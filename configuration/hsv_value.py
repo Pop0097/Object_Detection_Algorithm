@@ -64,7 +64,6 @@ while True:
     HSV_image_resized = cv2.resize(image_HSV, (1000, 600))
     HSV_specific_image_resized = cv2.resize(HSV_specific_image, (1000, 600))
 
-
     # Displays images
     cv2.imshow("HSV", HSV_specific_image_resized)
     cv2.imshow("HSV Specific", HSV_image_resized)
