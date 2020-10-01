@@ -24,7 +24,7 @@ import cv2
 import numpy as np
 
 def placeholder_method(empty_variable): # empty method
-    pass
+    pass 
 
 # Creates a window that modifies the HSV values we are looking for.
 cv2.namedWindow("TrackBar")
