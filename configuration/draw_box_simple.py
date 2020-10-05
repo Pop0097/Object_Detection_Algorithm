@@ -7,7 +7,7 @@ This file is just made to get an idea of how to get the coordinates of the ball 
 import cv2
 import numpy as np
 
-image_path = 'image/ball.jpg'
+image_path = 'configuration/image/ball.jpg'
 image = cv2.imread(image_path) # Gets image from directory
 image = cv2.resize(image, (1000, 600))
 image_HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)  # Converts the image from blue green red (BGR) to HSV
@@ -35,7 +35,10 @@ for contour in contours:
             print(x, " ", y, " ", width, " ", height)
             cv2.rectangle(image, (x, y), (x+width, y+height), (0, 255, 0), 3) # Draws rectangle on image
 
-cv2.imshow("Image", image)
-print(ball_coordinates)
+while True:
+    cv2.imshow("Image", image)
+    # print(ball_coordinates)
 
-cv2.waitKey(0)
+    if cv2.waitKey(1) & 0xFF == ord('q'): # If 'q' is pressed, code ends
+        break
+
