@@ -1,6 +1,19 @@
 import cv2
 import numpy as np
 
+"""
+Next steps:
+- Find out what the x-coordinate is for the center of the image.
+- Right now, the program is only detecting the ball every few frames, 
+  increasing the reliability of the detection algorithm is important.
+"""
+
+### GLOBAL VARIABLES BEGINS ###
+
+### GLOBAL VARIABLES ENDS ###
+
+
+
 ### METHOD BLOCK BEGINS ###
 
 def detect_object():
@@ -30,7 +43,7 @@ def detect_object():
 
     for contour in contours:
         shape_area = cv2.contourArea(contour)
-        if shape_area > 1500:  # If shape area is larger than 500 (makes sure random detectoins are not processed)
+        if shape_area > 2000:  # If shape area is larger than 500 (makes sure random detectoins are not processed)
             perimeter = cv2.arcLength(contour, True)
             verticies = cv2.approxPolyDP(contour, 0.03 * perimeter, True)  # Adjust values as needed
 
@@ -40,18 +53,25 @@ def detect_object():
                 object_rectangle_width_height = [width, height]
 
                 # Determines if the ball is to the left or right of the car
-                if x < video_frame_width: # Left
+                if x+width/2+50 < video_frame_width: # Left
+                    # cv2.putText(image, "Left", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA)
                     object_position_relative = 0
-                elif x > video_frame_width: # Right
+                elif x+width/2-250 > video_frame_height: # Right
+                    # cv2.putText(image, "Right", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA )
                     object_position_relative = 1
                 else: # Center (Dead ahead)
+                    # cv2.putText(image, "Center", (x, y), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 3, cv2.LINE_AA)
                     object_position_relative = 2
 
                 cv2.rectangle(image, (x, y), (x + width, y + height), (0, 255, 0), 3)  # Draws rectangle on image
 
-                return 0  # Exits for loop after the ball is found to reduce execution time
+                return object_position_relative, shape_area, object_coordinates_in_frame, object_rectangle_width_height  # Exits for loop (and function) after the ball is found to reduce execution time
 
-### HELPER BLOCK ENDS ###
+    return -1, -1, [-1, -1], [-1, -1] # If object not found
+
+### METHOD BLOCK BLOCK ENDS ###
+
+
 
 ### MAIN CODE BLOCK BEGINS ###
 
@@ -66,8 +86,8 @@ video_capture.set(4, video_frame_height)
 video_capture.set(10, video_brightness_adjustment)
 # https://stackoverflow.com/questions/11420748/setting-camera-parameters-in-opencv-python --> good source to see what each .set() parameter does.
 
-global object_position_relative, object_contour_area, object_coordinates_in_frame, object_rectangle_width_height
-object_position_relative = 0 # 0 means left of center, 1 means right, 2 means center
+# Stores information related to the position of the object in the image
+object_position_relative = 0 # 0 means left of center, 1 means right, 2 means center, -1 means not found
 object_contour_area = 0 # Gives indication of how close the object is to the car
 object_coordinates_in_frame = [0,0] # Coordinates of object in the frame
 object_rectangle_width_height = [0, 0] # Width and height of bounding rectangle
@@ -75,19 +95,28 @@ object_rectangle_width_height = [0, 0] # Width and height of bounding rectangle
 while True:
     success, image = video_capture.read()
 
-    detect_object() # Calls method to process image and identify object
+    object_position_relative, object_contour_area, object_coordinates_in_frame, object_rectangle_width_height = detect_object() # Calls method to process image and identify object
 
     cv2.imshow("Webcam_Input", image)
 
-    if object_position_relative == 0: # Left
-        print("Left")
-    elif object_position_relative == 1: # Right
-        print("Right")
-    else: # center
-        print("Center")
+    # print(object_position_relative, " ", object_contour_area, " ", object_coordinates_in_frame, " ", object_rectangle_width_height)
+
+    """
+    Steps to add next:
+    - Determine the motor power output required to get the object to the center of the frame (or for it to become larger)
+    - Power motors using PWM, and use a PID to constantly modify the power output
+    """
+
+    # if object_position_relative == 0: # Left
+    #
+    # elif object_position_relative == 1: # Right
+    #
+    # else: # center
 
     if cv2.waitKey(1) & 0xFF == ord('q'): # If 'q' is pressed, code ends
         break
+
+    cv2.waitKey(10)
 
 
 print("Terminated")
